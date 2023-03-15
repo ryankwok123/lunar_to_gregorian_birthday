@@ -9,9 +9,10 @@ from pprint import pprint
 birthdates = []
 
 def lunar2gregorian(year_start, year_end, month, day):
+
     for year in range(year_start, year_end+1): #can handle years 1900 to 2100 for range we do +1
         
-        #check if the input date falls on a leap month
+        #check if the input date falls on a leap month (chinese lunar calendar thing)
         def is_valid_lunar_date(year, month, day):
             try:
                 lunar = Lunar(year, month, day, isleap=True)
@@ -23,14 +24,16 @@ def lunar2gregorian(year_start, year_end, month, day):
         valid = is_valid_lunar_date(year, month, day)
         print(valid)  
 
-
         #set lunar date and isleap parameter with 'valid'
-        lunar = Lunar(year, month, day,isleap=valid)
+        lunar = Lunar(year, month, day, isleap=valid)
         print(lunar)
-'''
+
         solar = str(Converter.Lunar2Solar(lunar))
         print(solar)
 
+        #now need to find a way to convert the solar date string to date format (probably use pandas)
+        #method below works but is pretty damn ugly
+'''
         #extract year, month, day from converted date
             #solar[11:15] #year
             #solar[23:24] #month
