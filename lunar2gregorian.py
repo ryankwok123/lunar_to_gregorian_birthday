@@ -1,4 +1,4 @@
-from calendar import isleap
+
 import datetime
 from lunarcalendar import Converter, Solar, Lunar, DateNotExist
 import pandas as pd
@@ -14,22 +14,40 @@ def lunar2gregorian(year_start, year_end, month, day):
         
         #check if the input date falls on a leap month (chinese lunar calendar thing)
         def is_valid_lunar_date(year, month, day):
-            try:
+            try:   
                 lunar = Lunar(year, month, day, isleap=True)
+                print(f'You will have two birthdays in the year {year}! One in the initial month (month {month}) and one in the leap month (2nd month {month})')
                 return True
             except DateNotExist:
                 return False
 
         #store output of is_valid_lunar_date
         valid = is_valid_lunar_date(year, month, day)
-        print(valid)  
+        #print(valid)  
 
-        #set lunar date and isleap parameter with 'valid'
-        lunar = Lunar(year, month, day, isleap=valid)
-        print(lunar)
+        #conditional will print two birthdays if valid is true, one for initial month and one for leap month 
+        if valid == True:
+            #set lunar date and isleap parameter with not 'valid' for initial birthday
+            lunar2 = Lunar(year, month, day, isleap=not valid)
+            print(lunar2)
 
-        solar = str(Converter.Lunar2Solar(lunar))
-        print(solar)
+            solar = str(Converter.Lunar2Solar(lunar2))
+            print(f'{solar} initial birthday')
+
+            #set lunar date and isleap parameter with 'valid' for leap month birthdate
+            lunar = Lunar(year, month, day, isleap=valid)
+            print(lunar)
+
+            solar = str(Converter.Lunar2Solar(lunar))
+            print(f'{solar} leap month birthday')
+        else:
+            #when the date does not land on a leap month (valid==false)
+            lunar = Lunar(year, month, day, isleap=valid)
+            print(lunar)
+
+            solar = str(Converter.Lunar2Solar(lunar))
+            print(solar)
+            
 
         #now need to find a way to convert the solar date string to date format (probably use pandas)
         #method below works but is pretty damn ugly
