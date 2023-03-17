@@ -9,8 +9,9 @@ from tabulate import tabulate
 #mom's birthday is lunar: 8th month, 7th day
 
 birthdates = []
+valid_list = []
 
-def lunar2gregorian(year_start, year_end, month, day):
+def lunar2gregorian(year_start, year_end, month, day, name):
 
     for year in range(year_start, year_end+1): #can handle years 1900 to 2100 for range we do +1
         
@@ -37,6 +38,7 @@ def lunar2gregorian(year_start, year_end, month, day):
             print(f'{solar} initial birthday')
             print(lunar2.to_date(), type(lunar2.to_date())) #convert to datetime.date format
             birthdates.append(lunar2.to_date())
+            valid_list.append(valid)
 
 
             #set lunar date and isleap parameter with 'valid' for leap month birthdate
@@ -47,6 +49,7 @@ def lunar2gregorian(year_start, year_end, month, day):
             print(f'{solar} leap month birthday')
             print(lunar.to_date(), type(lunar.to_date())) #convert to datetime.date format
             birthdates.append(lunar.to_date())
+            valid_list.append(valid)
         else:
             #when the date does not land on a leap month (valid==false)
             lunar = Lunar(year, month, day, isleap=valid)
@@ -56,37 +59,40 @@ def lunar2gregorian(year_start, year_end, month, day):
             #print(solar)
             print(lunar.to_date(), type(lunar.to_date())) #convert to datetime.date format
             birthdates.append(lunar.to_date())
+            valid_list.append(valid)
 
-        #now need to find a way to convert the solar date string to date format (probably use pandas)
-        #method below works but is pretty damn ugly
-    #pprint(birthdates)        
+
+    #now we convert the solar date string to date format     
+    #creating empty dataframe with headers     
     column_names = ['Subject','Start Date', 'Start Time','Description']
     df = pd.DataFrame(columns = column_names)
 
+    #appending columns to our dataframe
+    df['Subject'] = [f'{name}s birthday' for subject in range(len(birthdates))]
     df['Start Date'] = birthdates
-    df['Subject'] = ['ur mum' for subject in range(len(birthdates))]
+    df['Start Time'] = ['9:00:00' for starttime in range(len(birthdates))]  
 
+    #display different description message based on whether or not the birthday lands on a leap month
+    def description():
+        desc_list = []
+        for index in range(len(valid_list)):
+            if valid_list[index]==False:
+                desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar!')
+            else:
+                desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar! This is one of two birthdays {name} will have this year since their birthday has landed on a leap month.')  
+        
+        return desc_list
+    df['Description'] = description()  
+    
 
-    # Use pandas.to_datetime() to convert string to datetime format
-    df["Start Date"] = pd.to_datetime(df["Start Date"]) #add , format='%y%m%d' when dealing with dates
+    # Use pandas.to_datetime() to convert string to datetime format (only keeping date portion)
+    df["Start Date"] = pd.to_datetime(df["Start Date"]).dt.date 
+    
 
     pprint(tabulate(df, headers=column_names, tablefmt='psql'))
     print(df.dtypes)
 
 '''
-        #extract year, month, day from converted date
-            #solar[11:15] #year
-            #solar[23:24] #month
-            #solar[-3:-1] #day
-
-        #converting into proper date format
-        newStr = solar[23:24]+"/"+solar[-3:-1]+"/"+solar[11:15]
-        newStr = newStr.replace("=", "") 
-        #print(newStr)
-
-        birthdates.append(newStr)
-        
-    pprint(birthdates)
 
 
 df = pd.DataFrame()
@@ -95,4 +101,4 @@ df.to_csv('mom_birthday_calendar.csv', index = False)
 '''
 
 
-lunar2gregorian(1900, 2100, 8, 7)
+lunar2gregorian(1900, 2100, 8, 7, 'Mom')
