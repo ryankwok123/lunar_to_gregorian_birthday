@@ -6,7 +6,6 @@ from pprint import pprint
 from tabulate import tabulate
 
 #this script can only handle years 1900-2100
-#mom's birthday is lunar: 8th month, 7th day
 
 birthdates = []
 valid_list = []
@@ -74,12 +73,18 @@ def lunar2gregorian(year_start, year_end, month, day, name):
 
     #display different description message based on whether or not the birthday lands on a leap month
     def description():
+
+        #short function that attaches the appropriate suffix based on the number    
+        def suffix(d):
+            return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
+
+        #messages for regular birthdays and leap month birthdays
         desc_list = []
         for index in range(len(valid_list)):
             if valid_list[index]==False:
-                desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar!')
+                desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar ({year}, {month}{suffix(month)} month, {day}{suffix(day)} day)!')
             else:
-                desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar! This is one of two birthdays {name} will have this year since their birthday has landed on a leap month.')  
+                desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar ({year}, {month}{suffix(month)} month, {day}{suffix(day)} day)! This is one of two birthdays {name} will have this year since their birthday lands on a leap month.')  
         
         return desc_list
     df['Description'] = description()  
@@ -88,17 +93,11 @@ def lunar2gregorian(year_start, year_end, month, day, name):
     # Use pandas.to_datetime() to convert string to datetime format (only keeping date portion)
     df["Start Date"] = pd.to_datetime(df["Start Date"]).dt.date 
     
+    #sample table
+    print(tabulate(df, headers=column_names, tablefmt='psql'))
 
-    pprint(tabulate(df, headers=column_names, tablefmt='psql'))
-    print(df.dtypes)
-
-'''
-
-
-df = pd.DataFrame()
-df["Start Date"] = birthdates
-df.to_csv('mom_birthday_calendar.csv', index = False)
-'''
+    #save as csv
+    df.to_csv('lunar_to_gregorian_birthdays.csv', index = False)
 
 
-lunar2gregorian(1900, 2100, 8, 7, 'Mom')
+lunar2gregorian(1900, 2100, 8, 2, 'Jason')
