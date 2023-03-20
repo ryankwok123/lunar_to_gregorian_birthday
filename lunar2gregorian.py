@@ -15,7 +15,13 @@ class convert_date:
         self.day = day
     
     #insert method here
-
+    def is_valid_lunar_date(self, year, month, day):
+        try:   
+            lunar = Lunar(year, month, day, isleap=True)
+            print(f'You will have two birthdays in the year {year}! One on the initial month (month {month}) and one on the leap month (2nd month {month})')
+            return True
+        except DateNotExist:
+            return False
 
 jason_bday = convert_date(1900, 2100, 8, 2)
 
