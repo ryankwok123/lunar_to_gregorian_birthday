@@ -16,6 +16,7 @@ class convert_date:
         self.name = name
         self.birthdates = []
         self.valid_list = []
+        self.valid_list_with_repeats = []
 
     
     #check if the input date falls on a leap month (chinese lunar calendar thing), returns list of True/False
@@ -29,7 +30,7 @@ class convert_date:
             except DateNotExist:
                 self.valid_list.append((year, False))
 
-        pprint(self.valid_list)
+        #pprint(self.valid_list)
         return self.valid_list
     
 
@@ -45,7 +46,8 @@ class convert_date:
                 solar = str(Converter.Lunar2Solar(lunar2))
                 #print(f'{solar} initial birthday')
                 #print(lunar2.to_date(), type(lunar2.to_date())) #convert to datetime.date format
-                self.birthdates.append(lunar2.to_date())
+                self.birthdates.append(str(lunar2.to_date()))
+                self.valid_list_with_repeats.append(True)
                 
 
                 #set lunar date and isleap parameter with original boolean (True) for leap month birthdate
@@ -55,7 +57,8 @@ class convert_date:
                 solar = str(Converter.Lunar2Solar(lunar))
                 #print(f'{solar} leap month birthday')
                 #print(lunar.to_date(), type(lunar.to_date())) #convert to datetime.date format
-                self.birthdates.append(lunar.to_date())
+                self.birthdates.append(str(lunar.to_date()))
+                self.valid_list_with_repeats.append(True)
             else:
                 #when the date does not land on a leap month (valid==false)
                 lunar = Lunar(index[0], self.month, self.day, isleap=index[1])
@@ -63,17 +66,21 @@ class convert_date:
 
                 solar = str(Converter.Lunar2Solar(lunar))
                 #print(solar)
-                #print(lunar.to_date(), type(lunar.to_date())) #convert to datetime.date format
-                self.birthdates.append(lunar.to_date())
+                #print(lunar.to_date()) #convert to datetime.date format
+                self.birthdates.append(str(lunar.to_date()))
+                self.valid_list_with_repeats.append(False)
         
-        pprint(self.birthdates)
-        print(len(self.birthdates))
-        return self.birthdates
+        #pprint(self.birthdates)
+        birthdate_len = len(self.birthdates)
+        return self.birthdates, birthdate_len
 
-#jason_bday = convert_date(2090, 2100, 8, 2)
+'''
+jason_bday = convert_date(2090, 2100, 8, 2, 'jason')
 #jason_bday.is_valid_lunar_date()
-#jason_bday.create_birthday_list()
-
+a, b = jason_bday.create_birthday_list()
+pprint(b)
+#pprint(len(jason_bday.create_birthday_list()))
+'''
 
 
 #class 2: to_dataframe
@@ -88,31 +95,52 @@ class to_dataframe(convert_date):
     #appending all columns to our dataframe (except description)
     def append_subject_startdate_starttime(self):
         df = to_dataframe.empty_dataframe(self)
+        birthdate_list, birthdate_list_len = self.create_birthday_list()
 
-        df['Subject'] = [f'{self.name}s birthday' for subject in range(len(self.birthdates))]
+        df['Subject'] = [f'{self.name}s birthday' for subject in range(birthdate_list_len)]
 
         # Use pandas.to_datetime() to convert string to datetime format (only keeping date portion)
-        df["Start Date"] = self.birthdates
+        df["Start Date"] = birthdate_list
         df["Start Date"] = pd.to_datetime(df["Start Date"]).dt.date 
 
-        df['Start Time'] = ['9:00:00' for starttime in range(len(self.birthdates))]
-
-        print(tabulate(df,  tablefmt='psql'))
+        df['Start Time'] = ['9:00:00' for starttime in range(birthdate_list_len)]
+        return df
         
-
     #short function that attaches the appropriate suffix based on the number   
     def suffix(self, d): 
         return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
         
+
+
+
+    #display different description message based on whether or not the birthday lands on a leap month    
     def append_description(self):
-        pass
+        df = to_dataframe.append_subject_startdate_starttime(self)
+
+        #messages for regular birthdays and leap month birthdays
+        birthdate_year = pd.to_datetime(df["Start Date"]).dt.year #df[Start Date] that only contains the year portion
+
+        pprint(self.valid_list_with_repeats)
+
+        desc_list = []
+        for index in range(len(self.valid_list_with_repeats)):
+            if self.valid_list_with_repeats[index]==False:
+                desc_list.append(f'Its {self.name}s birthday today in the chinese lunar calendar ({birthdate_year.iloc[index]}, {self.month}{self.suffix(self.month)} month, {self.day}{self.suffix(self.day)} day)!')
+            else:
+                desc_list.append(f'Its {self.name}s birthday today in the chinese lunar calendar ({birthdate_year.iloc[index]}, {self.month}{self.suffix(self.month)} month, {self.day}{self.suffix(self.day)} day)! This is one of two birthdays {self.name} will have this year since their birthday lands on a leap month.')  
+        
+        df['Description'] = desc_list
+        return tabulate(df)
+        
+        
 
     def display_and_save_to_csv(self):
         pass
 
 jason_bday = to_dataframe(2090, 2100, 8, 2, 'Jason')
-jason_bday.empty_dataframe()
-jason_bday.append_subject_startdate_starttime()
+#jason_bday.empty_dataframe()
+#print(jason_bday.is_valid_lunar_date())
+print(jason_bday.append_description())
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
 '''
