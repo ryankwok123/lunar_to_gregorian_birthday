@@ -74,14 +74,6 @@ class convert_date:
         birthdate_len = len(self.birthdates)
         return self.birthdates, birthdate_len
 
-'''
-jason_bday = convert_date(2090, 2100, 8, 2, 'jason')
-#jason_bday.is_valid_lunar_date()
-a, b = jason_bday.create_birthday_list()
-pprint(b)
-#pprint(len(jason_bday.create_birthday_list()))
-'''
-
 
 #class 2: to_dataframe
 class to_dataframe(convert_date):
@@ -110,8 +102,6 @@ class to_dataframe(convert_date):
     def suffix(self, d): 
         return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
         
-
-
 
     #display different description message based on whether or not the birthday lands on a leap month    
     def append_description(self):
