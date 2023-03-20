@@ -18,20 +18,26 @@ class convert_date:
 
     
     #check if the input date falls on a leap month (chinese lunar calendar thing)
-    def is_valid_lunar_date(self, year_start, year_end, month, day):
+    def is_valid_lunar_date(self):
         #put the loop in here this time
         for year in range(self.year_start, self.year_end+1): #can handle years 1900 to 2100 for range we do +1
-
             try:   
                 lunar = Lunar(year, self.month, self.day, isleap=True)
-                print(f'You will have two birthdays in the year {year}! One on the initial month (month {self.month}) and one on the leap month (2nd month {self.month})')
-                return True
+                #print(f'You will have two birthdays in the year {year}! One on the initial month (month {self.month}) and one on the leap month (2nd month {self.month})')
+                self.valid_list.append(True)
             except DateNotExist:
-                return False
-    
-    
+                self.valid_list.append(False)
 
-jason_bday = convert_date(1900, 2100, 8, 2)
+        pprint(self.valid_list)
+        print(len(self.valid_list))
+        return self.valid_list
+    
+    def leap_or_nonleap_birthday(self):
+        pass
+
+        
+jason_bday = convert_date(2090, 2100, 8, 2)
+jason_bday.is_valid_lunar_date()
 
 
 
@@ -101,7 +107,11 @@ df = pd.DataFrame(columns = column_names)
 
 #appending columns to our dataframe
 df['Subject'] = [f'{name}s birthday' for subject in range(len(birthdates))]
+
 df['Start Date'] = birthdates
+# Use pandas.to_datetime() to convert string to datetime format (only keeping date portion)
+df["Start Date"] = pd.to_datetime(df["Start Date"]).dt.date 
+
 df['Start Time'] = ['9:00:00' for starttime in range(len(birthdates))]  
 
 #display different description message based on whether or not the birthday lands on a leap month
@@ -112,19 +122,20 @@ def description():
         return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
 
     #messages for regular birthdays and leap month birthdays
+    birthdate_year = pd.to_datetime(df["Start Date"]).dt.year #df[Start Date] that only contains the year portion
+
     desc_list = []
     for index in range(len(valid_list)):
         if valid_list[index]==False:
-            desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar ({year}, {month}{suffix(month)} month, {day}{suffix(day)} day)!')
+            desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar ({birthdate_year.iloc[index]}, {month}{suffix(month)} month, {day}{suffix(day)} day)!')
         else:
-            desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar ({year}, {month}{suffix(month)} month, {day}{suffix(day)} day)! This is one of two birthdays {name} will have this year since their birthday lands on a leap month.')  
+            desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar ({birthdate_year.iloc[index]}, {month}{suffix(month)} month, {day}{suffix(day)} day)! This is one of two birthdays {name} will have this year since their birthday lands on a leap month.')  
         
     return desc_list
 df['Description'] = description()  
     
 
-# Use pandas.to_datetime() to convert string to datetime format (only keeping date portion)
-df["Start Date"] = pd.to_datetime(df["Start Date"]).dt.date 
+
     
 #sample table
 print(tabulate(df, headers=column_names, tablefmt='psql'))
