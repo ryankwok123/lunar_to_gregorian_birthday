@@ -120,8 +120,6 @@ class to_dataframe(convert_date):
         #messages for regular birthdays and leap month birthdays
         birthdate_year = pd.to_datetime(df["Start Date"]).dt.year #df[Start Date] that only contains the year portion
 
-        pprint(self.valid_list_with_repeats)
-
         desc_list = []
         for index in range(len(self.valid_list_with_repeats)):
             if self.valid_list_with_repeats[index]==False:
@@ -130,17 +128,26 @@ class to_dataframe(convert_date):
                 desc_list.append(f'Its {self.name}s birthday today in the chinese lunar calendar ({birthdate_year.iloc[index]}, {self.month}{self.suffix(self.month)} month, {self.day}{self.suffix(self.day)} day)! This is one of two birthdays {self.name} will have this year since their birthday lands on a leap month.')  
         
         df['Description'] = desc_list
-        return tabulate(df)
+        return df
         
-        
-
+    
     def display_and_save_to_csv(self):
-        pass
+        df = to_dataframe.append_description(self)
+        column_names = ['Subject','Start Date', 'Start Time','Description']
 
-jason_bday = to_dataframe(2090, 2100, 8, 2, 'Jason')
+        #sample table
+        print(tabulate(df, headers=column_names, tablefmt='psql'))
+
+        #save as csv
+        df.to_csv('lunar_to_gregorian_birthdays.csv', index = False)
+
+        return tabulate(df)
+
+
+jason_bday = to_dataframe(2090, 2100, 8, 3, 'Jason')
 #jason_bday.empty_dataframe()
 #print(jason_bday.is_valid_lunar_date())
-print(jason_bday.append_description())
+print(jason_bday.display_and_save_to_csv())
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
 '''
