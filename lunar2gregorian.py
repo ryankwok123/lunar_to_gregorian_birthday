@@ -17,27 +17,63 @@ class convert_date:
         self.valid_list = []
 
     
-    #check if the input date falls on a leap month (chinese lunar calendar thing)
+    #check if the input date falls on a leap month (chinese lunar calendar thing), returns list of True/False
     def is_valid_lunar_date(self):
         #put the loop in here this time
         for year in range(self.year_start, self.year_end+1): #can handle years 1900 to 2100 for range we do +1
             try:   
                 lunar = Lunar(year, self.month, self.day, isleap=True)
                 #print(f'You will have two birthdays in the year {year}! One on the initial month (month {self.month}) and one on the leap month (2nd month {self.month})')
-                self.valid_list.append(True)
+                self.valid_list.append((year, True))
             except DateNotExist:
-                self.valid_list.append(False)
+                self.valid_list.append((year, False))
 
         pprint(self.valid_list)
-        print(len(self.valid_list))
         return self.valid_list
     
-    def leap_or_nonleap_birthday(self):
-        pass
+
+    def create_birthday_list(self):
+        for index in convert_date.is_valid_lunar_date(self):
+
+            #conditional will print two birthdays if valid is true, one for initial month and one for leap month 
+            if index[1] == True:
+                #set lunar date and isleap parameter with opposite boolean (True->False) for initial birthday
+                lunar2 = Lunar(index[0], self.month, self.day, isleap=not index[1])
+                #print(lunar2)
+
+                solar = str(Converter.Lunar2Solar(lunar2))
+                #print(f'{solar} initial birthday')
+                #print(lunar2.to_date(), type(lunar2.to_date())) #convert to datetime.date format
+                self.birthdates.append(lunar2.to_date())
+                
+
+                #set lunar date and isleap parameter with original boolean (True) for leap month birthdate
+                lunar = Lunar(index[0], self.month, self.day, isleap=index[1])
+                #print(lunar)
+
+                solar = str(Converter.Lunar2Solar(lunar))
+                #print(f'{solar} leap month birthday')
+                #print(lunar.to_date(), type(lunar.to_date())) #convert to datetime.date format
+                self.birthdates.append(lunar.to_date())
+                
+            else:
+                #when the date does not land on a leap month (valid==false)
+                lunar = Lunar(index[0], self.month, self.day, isleap=index[1])
+                #print(lunar)
+
+                solar = str(Converter.Lunar2Solar(lunar))
+                #print(solar)
+                #print(lunar.to_date(), type(lunar.to_date())) #convert to datetime.date format
+                self.birthdates.append(lunar.to_date())
+        
+        pprint(self.birthdates)
+        return self.birthdates
+
 
         
 jason_bday = convert_date(2090, 2100, 8, 2)
-jason_bday.is_valid_lunar_date()
+#jason_bday.is_valid_lunar_date()
+jason_bday.create_birthday_list()
 
 
 
