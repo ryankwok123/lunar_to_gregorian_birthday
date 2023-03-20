@@ -8,11 +8,12 @@ from tabulate import tabulate
 #OOP time
 #class 1: convert_date
 class convert_date:
-    def __init__(self, year_start, year_end, month, day):
+    def __init__(self, year_start, year_end, month, day, name):
         self.year_start = year_start
         self.year_end = year_end
         self.month = month
         self.day = day
+        self.name = name
         self.birthdates = []
         self.valid_list = []
 
@@ -32,9 +33,9 @@ class convert_date:
         return self.valid_list
     
 
+    #create a list for each year, one birthday for nonleap months and two for leap months
     def create_birthday_list(self):
         for index in convert_date.is_valid_lunar_date(self):
-
             #conditional will print two birthdays if valid is true, one for initial month and one for leap month 
             if index[1] == True:
                 #set lunar date and isleap parameter with opposite boolean (True->False) for initial birthday
@@ -55,7 +56,6 @@ class convert_date:
                 #print(f'{solar} leap month birthday')
                 #print(lunar.to_date(), type(lunar.to_date())) #convert to datetime.date format
                 self.birthdates.append(lunar.to_date())
-                
             else:
                 #when the date does not land on a leap month (valid==false)
                 lunar = Lunar(index[0], self.month, self.day, isleap=index[1])
@@ -67,16 +67,52 @@ class convert_date:
                 self.birthdates.append(lunar.to_date())
         
         pprint(self.birthdates)
+        print(len(self.birthdates))
         return self.birthdates
 
-
-        
-jason_bday = convert_date(2090, 2100, 8, 2)
+#jason_bday = convert_date(2090, 2100, 8, 2)
 #jason_bday.is_valid_lunar_date()
-jason_bday.create_birthday_list()
+#jason_bday.create_birthday_list()
 
 
 
+#class 2: to_dataframe
+class to_dataframe(convert_date):
+
+    #creating empty dataframe with headers   
+    def empty_dataframe(self): 
+        column_names = ['Subject','Start Date', 'Start Time','Description']
+        df = pd.DataFrame(columns = column_names)
+        return df
+    
+    #appending all columns to our dataframe (except description)
+    def append_subject_startdate_starttime(self):
+        df = to_dataframe.empty_dataframe(self)
+
+        df['Subject'] = [f'{self.name}s birthday' for subject in range(len(self.birthdates))]
+
+        # Use pandas.to_datetime() to convert string to datetime format (only keeping date portion)
+        df["Start Date"] = self.birthdates
+        df["Start Date"] = pd.to_datetime(df["Start Date"]).dt.date 
+
+        df['Start Time'] = ['9:00:00' for starttime in range(len(self.birthdates))]
+
+        print(tabulate(df,  tablefmt='psql'))
+        
+
+    #short function that attaches the appropriate suffix based on the number   
+    def suffix(self, d): 
+        return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
+        
+    def append_description(self):
+        pass
+
+    def display_and_save_to_csv(self):
+        pass
+
+jason_bday = to_dataframe(2090, 2100, 8, 2, 'Jason')
+jason_bday.empty_dataframe()
+jason_bday.append_subject_startdate_starttime()
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
 '''
