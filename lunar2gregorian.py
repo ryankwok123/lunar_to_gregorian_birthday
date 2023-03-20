@@ -13,15 +13,23 @@ class convert_date:
         self.year_end = year_end
         self.month = month
         self.day = day
+        self.birthdates = []
+        self.valid_list = []
+
     
-    #insert method here
-    def is_valid_lunar_date(self, year, month, day):
-        try:   
-            lunar = Lunar(year, month, day, isleap=True)
-            print(f'You will have two birthdays in the year {year}! One on the initial month (month {month}) and one on the leap month (2nd month {month})')
-            return True
-        except DateNotExist:
-            return False
+    #check if the input date falls on a leap month (chinese lunar calendar thing)
+    def is_valid_lunar_date(self, year_start, year_end, month, day):
+        #put the loop in here this time
+        for year in range(self.year_start, self.year_end+1): #can handle years 1900 to 2100 for range we do +1
+
+            try:   
+                lunar = Lunar(year, self.month, self.day, isleap=True)
+                print(f'You will have two birthdays in the year {year}! One on the initial month (month {self.month}) and one on the leap month (2nd month {self.month})')
+                return True
+            except DateNotExist:
+                return False
+    
+    
 
 jason_bday = convert_date(1900, 2100, 8, 2)
 
@@ -29,6 +37,7 @@ jason_bday = convert_date(1900, 2100, 8, 2)
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
+'''
 #this script can only handle years 1900-2100
 
 birthdates = []
@@ -123,5 +132,5 @@ print(tabulate(df, headers=column_names, tablefmt='psql'))
 #save as csv
 df.to_csv('lunar_to_gregorian_birthdays.csv', index = False)
 
-
+'''
 #lunar2gregorian(1900, 2100, 8, 2, 'Jason')
