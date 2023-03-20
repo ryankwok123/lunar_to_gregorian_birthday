@@ -1,5 +1,5 @@
 
-import datetime
+from datetime import datetime
 from lunarcalendar import Converter, Solar, Lunar, DateNotExist
 import pandas as pd
 from pprint import pprint
@@ -68,7 +68,11 @@ def lunar2gregorian(year_start, year_end, month, day, name):
 
     #appending columns to our dataframe
     df['Subject'] = [f'{name}s birthday' for subject in range(len(birthdates))]
+
     df['Start Date'] = birthdates
+    # Use pandas.to_datetime() to convert string to datetime format (only keeping date portion)
+    df["Start Date"] = pd.to_datetime(df["Start Date"]).dt.date 
+
     df['Start Time'] = ['9:00:00' for starttime in range(len(birthdates))]  
 
     #display different description message based on whether or not the birthday lands on a leap month
@@ -79,19 +83,20 @@ def lunar2gregorian(year_start, year_end, month, day, name):
             return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
 
         #messages for regular birthdays and leap month birthdays
+        birthdate_year = pd.to_datetime(df["Start Date"]).dt.year #df[Start Date] that only contains the year portion
+
         desc_list = []
         for index in range(len(valid_list)):
             if valid_list[index]==False:
-                desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar ({year}, {month}{suffix(month)} month, {day}{suffix(day)} day)!')
+                desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar ({birthdate_year.iloc[index]}, {month}{suffix(month)} month, {day}{suffix(day)} day)!')
             else:
-                desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar ({year}, {month}{suffix(month)} month, {day}{suffix(day)} day)! This is one of two birthdays {name} will have this year since their birthday lands on a leap month.')  
+                desc_list.append(f'Its {name}s birthday today in the chinese lunar calendar ({birthdate_year.iloc[index]}, {month}{suffix(month)} month, {day}{suffix(day)} day)! This is one of two birthdays {name} will have this year since their birthday lands on a leap month.')  
         
         return desc_list
     df['Description'] = description()  
     
 
-    # Use pandas.to_datetime() to convert string to datetime format (only keeping date portion)
-    df["Start Date"] = pd.to_datetime(df["Start Date"]).dt.date 
+    
     
     #sample table
     print(tabulate(df, headers=column_names, tablefmt='psql'))
