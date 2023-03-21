@@ -15,4 +15,8 @@ new plan: create reorganize using OOP
 class1: convert_date
 	checks if the input date falls on a leap month
 
+<<<<<<< HEAD
 class2: to_dataframe
+=======
+class2: to_dataframe
+>>>>>>> OOP
