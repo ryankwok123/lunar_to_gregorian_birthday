@@ -137,3 +137,5 @@ jason_bday = to_dataframe(1900, 2100, 8, 3, 'Jason')
 #jason_bday.empty_dataframe()
 #print(jason_bday.is_valid_lunar_date())
 print(jason_bday.display_and_save_to_csv())
+
+pd.read_csv('lunar_to_gregorian_birthdays.csv')
